@@ -8,8 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class NoteActivity extends AppCompatActivity {
     private EditText textNoteText;
     private int notePosition;
     private boolean isCancelling;
+    private NoteActivityViewModel noteActivityViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,16 @@ public class NoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_note);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ViewModelProvider viewModelProvider = new ViewModelProvider(getViewModelStore(),
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()));
+        noteActivityViewModel = viewModelProvider.get(NoteActivityViewModel.class);
+
+        if (noteActivityViewModel.isNewlyCreated && savedInstanceState != null){
+            noteActivityViewModel.restoreState(savedInstanceState);
+        }
+
+        noteActivityViewModel.isNewlyCreated = false;
 
         spinnerCourses = findViewById(R.id.spinner_courses);
 
@@ -40,6 +53,7 @@ public class NoteActivity extends AppCompatActivity {
         spinnerCourses.setAdapter(adapterCourses);
 
         readDisplayStateValues();
+        saveOriginalNoteValues();
 
         textNoteTitle = findViewById(R.id.text_note_title);
         textNoteText = findViewById(R.id.text_note_text);
@@ -50,14 +64,43 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (outState != null){
+            noteActivityViewModel.saveState(outState);
+        }
+    }
+
+    private void saveOriginalNoteValues() {
+        if (mIsNewNote)
+            return;
+
+        noteActivityViewModel.originalNoteCourseId = mNote.getCourse().getCourseId();
+        noteActivityViewModel.originalNoteTitle = mNote.getTitle();
+        noteActivityViewModel.originalNoteText = mNote.getText();
+
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (isCancelling) {
-            if (mIsNewNote)
+            if (mIsNewNote) {
                 DataManager.getInstance().removeNote(notePosition);
+            } else {
+                storePreviousNoteValues();
+            }
         } else {
             saveNote();
         }
+    }
+
+    private void storePreviousNoteValues() {
+        CourseInfo courseInfo = DataManager.getInstance().getCourse(noteActivityViewModel.originalNoteCourseId);
+        mNote.setCourse(courseInfo);
+        mNote.setTitle(noteActivityViewModel.originalNoteTitle);
+        mNote.setText(noteActivityViewModel.originalNoteText);
     }
 
     private void saveNote() {
