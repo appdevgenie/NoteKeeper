@@ -2,6 +2,7 @@ package com.appdevgenie.notekeeper;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
@@ -16,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
+    private final String TAG = getClass().getSimpleName();
     public static final String NOTE_POSITION = "com.appdevgenie.notekeeper.NOTE_POSITION";
     public static final int POSITION_NOT_SET = -1;
 
@@ -39,7 +41,7 @@ public class NoteActivity extends AppCompatActivity {
                 ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()));
         noteActivityViewModel = viewModelProvider.get(NoteActivityViewModel.class);
 
-        if (noteActivityViewModel.isNewlyCreated && savedInstanceState != null){
+        if (noteActivityViewModel.isNewlyCreated && savedInstanceState != null) {
             noteActivityViewModel.restoreState(savedInstanceState);
         }
 
@@ -61,13 +63,15 @@ public class NoteActivity extends AppCompatActivity {
             displayNote(spinnerCourses, textNoteTitle, textNoteText);
         }
 
+        Log.d(TAG, "onCreate");
+
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (outState != null){
+        if (outState != null) {
             noteActivityViewModel.saveState(outState);
         }
     }
@@ -85,6 +89,7 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.i(TAG, "Cancelling note at position: " + notePosition);
         if (isCancelling) {
             if (mIsNewNote) {
                 DataManager.getInstance().removeNote(notePosition);
@@ -94,6 +99,7 @@ public class NoteActivity extends AppCompatActivity {
         } else {
             saveNote();
         }
+        Log.d(TAG, "onPause");
     }
 
     private void storePreviousNoteValues() {
@@ -119,19 +125,20 @@ public class NoteActivity extends AppCompatActivity {
 
     private void readDisplayStateValues() {
         Intent intent = getIntent();
-        int position = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
-        mIsNewNote = position == POSITION_NOT_SET;
+        notePosition = intent.getIntExtra(NOTE_POSITION, POSITION_NOT_SET);
+        mIsNewNote = notePosition == POSITION_NOT_SET;
         if (mIsNewNote) {
             createNewNote();
-        } else {
-            mNote = DataManager.getInstance().getNotes().get(position);
         }
+        Log.i(TAG, "mNotePosition: " + notePosition);
+        mNote = DataManager.getInstance().getNotes().get(notePosition);
+
     }
 
     private void createNewNote() {
         DataManager dataManager = DataManager.getInstance();
         notePosition = dataManager.createNewNote();
-        mNote = dataManager.getNotes().get(notePosition);
+       //mNote = dataManager.getNotes().get(notePosition);
     }
 
     @Override
