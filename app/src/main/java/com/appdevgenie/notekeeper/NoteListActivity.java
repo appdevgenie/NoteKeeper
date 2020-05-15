@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +20,7 @@ import android.widget.ListView;
 import java.util.List;
 
 public class NoteListActivity extends AppCompatActivity {
+    private NoteRecyclerAdapter noteRecyclerAdapter;
 
     //private ArrayAdapter<NoteInfo> adapterNotes;
 
@@ -44,6 +46,7 @@ public class NoteListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //adapterNotes.notifyDataSetChanged();
+        noteRecyclerAdapter.notifyDataSetChanged();
     }
 
     private void initialiseDisplayContent() {
@@ -66,6 +69,9 @@ public class NoteListActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
 
+        List<NoteInfo> notes = DataManager.getInstance().getNotes();
+        noteRecyclerAdapter = new NoteRecyclerAdapter(this, notes);
+        recyclerView.setAdapter(noteRecyclerAdapter);
     }
 
 }
