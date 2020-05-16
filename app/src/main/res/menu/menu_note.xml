@@ -3,12 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.appdevgenie.notekeeper.NoteActivity">
     <item
-        android:id="@+id/action_send_mail"
+        android:id="@+id/action_cancel"
+        android:icon="@android:drawable/ic_menu_revert"
         android:orderInCategory="100"
+        android:title="Cancel"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_next"
+        android:icon="@android:drawable/ic_media_next"
+        android:orderInCategory="101"
+        android:title="@string/next"
+        app:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/action_send_mail"
+        android:orderInCategory="102"
         android:title="Send as mail"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_cancel"
-        android:orderInCategory="101"
-        android:title="Cancel" />
 </menu>
