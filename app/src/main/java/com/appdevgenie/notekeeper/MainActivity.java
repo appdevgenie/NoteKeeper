@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_notes, R.id.nav_courses, R.id.nav_slideshow)
+                R.id.nav_notes, R.id.nav_courses)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void handleSelection(String message) {
+    /*private void handleSelection(String message) {
         View view = findViewById(R.id.list_items);
         Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
-    }
+    }*/
 }
