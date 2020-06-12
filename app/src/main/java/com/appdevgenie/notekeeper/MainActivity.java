@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initialiseDisplayContent() {
+        DataManager.loadFromDatabase(openHelper);
         recyclerItems = findViewById(R.id.list_items);
         linearLayoutManager = new LinearLayoutManager(this);
         gridLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.course_grid_span));
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerItems.setLayoutManager(linearLayoutManager);
         recyclerItems.setAdapter(noteRecyclerAdapter);
 
-        SQLiteDatabase db = openHelper.getReadableDatabase();
         selectNavigationMenuItem(R.id.nav_notes);
     }
 
