@@ -2,6 +2,7 @@ package com.appdevgenie.notekeeper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,60 +11,90 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
+import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
 public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder> {
 
-    private Context context;
-    private final LayoutInflater layoutInflater;
-    private final List<NoteInfo> noteInfoList;
+    private final Context mContext;
+    private Cursor mCursor;
+    private final LayoutInflater mLayoutInflater;
+    private int mCoursePos;
+    private int mNoteTitlePos;
+    private int mIdPos;
 
-    public NoteRecyclerAdapter(Context context, List<NoteInfo> noteInfoList) {
-        this.context = context;
-        layoutInflater = LayoutInflater.from(context);
-        this.noteInfoList = noteInfoList;
+    public NoteRecyclerAdapter(Context context, Cursor cursor) {
+        mContext = context;
+        mCursor = cursor;
+        mLayoutInflater = LayoutInflater.from(mContext);
+        populateColumnPositions();
+    }
+
+    private void populateColumnPositions() {
+        if(mCursor == null)
+            return;
+        // Get column indexes from mCursor
+        mCoursePos = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_COURSE_ID);
+        mNoteTitlePos = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_NOTE_TITLE);
+        mIdPos = mCursor.getColumnIndex(NoteInfoEntry._ID);
+    }
+
+    public void changeCursor(Cursor cursor) {
+        if(mCursor != null)
+            mCursor.close();
+        mCursor = cursor;
+        populateColumnPositions();
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = layoutInflater.inflate(R.layout.item_note_list, parent, false);
+        View itemView = mLayoutInflater.inflate(R.layout.item_note_list, parent, false);
         return new ViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        NoteInfo note = noteInfoList.get(position);
-        holder.textCourse.setText(note.getCourse().getTitle());
-        holder.textTitle.setText(note.getTitle());
-        holder.id = note.getId();
-    }
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        mCursor.moveToPosition(position);
+        String course = mCursor.getString(mCoursePos);
+        String noteTitle = mCursor.getString(mNoteTitlePos);
+        int id = mCursor.getInt(mIdPos);
 
+        holder.mTextCourse.setText(course);
+        holder.mTextTitle.setText(noteTitle);
+        holder.mId = id;
+    }
     @Override
     public int getItemCount() {
-        return noteInfoList.size();
+        return mCursor == null ? 0 : mCursor.getCount();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public final TextView textCourse;
-        public final TextView textTitle;
-        public int id;
+        public final TextView mTextCourse;
+        public final TextView mTextTitle;
+        public int mId;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
-
-            textCourse = itemView.findViewById(R.id.text_course);
-            textTitle = itemView.findViewById(R.id.text_title);
+            mTextCourse = itemView.findViewById(R.id.text_course);
+            mTextTitle = itemView.findViewById(R.id.text_title);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, NoteActivity.class);
-                    intent.putExtra(NoteActivity.NOTE_ID, id);
-                    context.startActivity(intent);
+                public void onClick(View v) {
+                    Intent intent = new Intent(mContext, NoteActivity.class);
+                    intent.putExtra(NoteActivity.NOTE_ID, mId);
+                    mContext.startActivity(intent);
                 }
             });
         }
     }
 }
+
+
+
+
+
+
+
