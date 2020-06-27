@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -34,6 +35,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
+import static com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry.COURSE_TABLE_NAME;
 import static com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry.NOTE_TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -231,13 +233,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public Cursor loadInBackground() {
                     SQLiteDatabase db = openHelper.getReadableDatabase();
+
                     final String[] noteColumns = {
-                            NoteInfoEntry._ID,
+                            NoteInfoEntry.getQName(NoteInfoEntry._ID),
                             NoteInfoEntry.COLUMN_NOTE_TITLE,
-                            NoteInfoEntry.COLUMN_COURSE_ID};
-                    final String noteOrderBy = NoteInfoEntry.COLUMN_COURSE_ID +
+                            CourseInfoEntry.COLUMN_COURSE_TITLE
+                    };
+                    final String noteOrderBy = CourseInfoEntry.COLUMN_COURSE_TITLE +
                             "," + NoteInfoEntry.COLUMN_NOTE_TITLE;
-                    return db.query(NOTE_TABLE_NAME, noteColumns,
+
+                    String tablesWithJoin =
+                            NOTE_TABLE_NAME + " JOIN " +
+                                    COURSE_TABLE_NAME + " ON " +
+                                    NoteInfoEntry.getQName(NoteInfoEntry.COLUMN_COURSE_ID) + " = " +
+                                    CourseInfoEntry.getQName(CourseInfoEntry.COLUMN_COURSE_ID);
+
+                    return db.query(tablesWithJoin, noteColumns,
                             null, null, null, null, noteOrderBy);
                 }
             };

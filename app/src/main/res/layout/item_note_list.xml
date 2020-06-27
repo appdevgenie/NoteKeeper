@@ -25,6 +25,7 @@
                 android:layout_marginStart="8dp"
                 android:text="TextView"
                 android:textAppearance="@style/CourseTitle"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView3"
