@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -319,9 +320,18 @@ public class NoteActivity extends AppCompatActivity implements
             finish();
         } else if (id == R.id.action_next) {
             moveNext();
+        } else if (id == R.id.action_set_reminder) {
+            showReminderNotification();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showReminderNotification() {
+        NoteReminderNotification.notify(this,
+                textNoteTitle.getText().toString(),
+                textNoteText.getText().toString(),
+                (int) ContentUris.parseId(noteUri));
     }
 
     @Override
