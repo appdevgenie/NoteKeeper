@@ -8,6 +8,10 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.StrictMode;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +31,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -36,7 +39,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.List;
 
 import static com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry.NOTE_TABLE_NAME;
-import static com.appdevgenie.notekeeper.NoteKeeperProviderContract.*;
+import static com.appdevgenie.notekeeper.NoteKeeperProviderContract.Notes;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -59,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        enableStrictMode();
 
         openHelper = new NoteKeeperOpenHelper(this);
 
@@ -86,6 +91,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initialiseDisplayContent();
     }
 
+    private void enableStrictMode() {
+        if (BuildConfig.DEBUG) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .build();
+            StrictMode.setThreadPolicy(policy);
+
+        }
+    }
+
     @Override
     protected void onDestroy() {
         openHelper.close();
@@ -98,6 +114,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //noteRecyclerAdapter.notifyDataSetChanged();
         getLoaderManager().restartLoader(LOADER_NOTES, null, this);
         updateNavHeader();
+
+        openDrawer();
+    }
+
+    private void openDrawer() {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        }, 1000);
+
     }
 
     private void loadNotes() {

@@ -13,7 +13,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.appdevgenie.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
+import com.google.android.material.snackbar.Snackbar;
 
 import static com.appdevgenie.notekeeper.NoteActivityViewModel.ORIGINAL_NOTE_COURSE_ID;
 import static com.appdevgenie.notekeeper.NoteActivityViewModel.ORIGINAL_NOTE_TEXT;
@@ -289,12 +292,63 @@ public class NoteActivity extends AppCompatActivity implements
     }
 
     private void createNewNote() {
+        AsyncTask<ContentValues, Integer, Uri> task = new AsyncTask<ContentValues, Integer, Uri>() {
+            private ProgressBar progressBar;
+
+            @Override
+            protected void onPreExecute() {
+                progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+                progressBar.setVisibility(View.VISIBLE);
+                progressBar.setProgress(1);
+            }
+
+            @Override
+            protected Uri doInBackground(ContentValues... contentValues) {
+                ContentValues insertValues = contentValues[0];
+                Uri rowUri = getContentResolver().insert(Notes.CONTENT_URI, insertValues);
+
+                simulateLongRunningWork(); // simulate slow database work
+                publishProgress(2);
+
+                simulateLongRunningWork(); // simulate slow work with data
+                publishProgress(3);
+                return rowUri;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                int progressValue = values[0];
+                progressBar.setProgress(progressValue);
+            }
+
+            @Override
+            protected void onPostExecute(Uri uri) {
+                Log.d(TAG, "onPostExecute: thread: " + Thread.currentThread().getId());
+                noteUri = uri;
+                displaySnackbar(noteUri.toString());
+                progressBar.setVisibility(View.GONE);
+            }
+        };
+
         ContentValues values = new ContentValues();
         values.put(Notes.COLUMN_COURSE_ID, "");
         values.put(Notes.COLUMN_NOTE_TITLE, "");
         values.put(Notes.COLUMN_NOTE_TEXT, "");
 
-        noteUri = getContentResolver().insert(Notes.CONTENT_URI, values);
+        Log.d(TAG, "createNewNote: thread: " + Thread.currentThread().getId());
+        task.execute(values);
+
+    }
+
+    private void displaySnackbar(String message) {
+        View view = findViewById(R.id.spinner_courses);
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    private void simulateLongRunningWork() {
+        try {
+            Thread.sleep(2000);
+        } catch(Exception ex) {}
     }
 
     @Override
