@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getLoaderManager().restartLoader(LOADER_NOTES, null, this);
         updateNavHeader();
 
-        openDrawer();
+        //openDrawer();
     }
 
     private void openDrawer() {
