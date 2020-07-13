@@ -41,7 +41,7 @@ public class ModuleStatusView extends View {
     private float mRadius;
     private int mMaxHorizontalModules;
     private int mShape;
-    
+
     public boolean[] getModuleStatus() {
         return mModuleStatus;
     }
